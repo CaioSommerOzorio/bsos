@@ -1,13 +1,16 @@
 BOOT = boot.s
 KERNEL = kernel/kernel.c
-DISPLAY = libc/src/display.c
-STRING = libc/src/string.c
 LINKER = linker.ld
 GRUBCONFIG = grub.cfg
 
 SRC_DIR = src
 BUILD_DIR = build
 ISO_DIR = $(BUILD_DIR)/isodir
+
+LIBC_SRC = libc/src
+DISPLAY = $(LIBC_SRC)/display.c
+STRING = $(LIBC_SRC)/string.c
+INPUT = $(LIBC_SRC)/input.c
 
 .PHONY: build run clean
 
@@ -44,6 +47,15 @@ build:
 		-Wextra \
 		-I$(SRC_DIR)/libc/include
 
+	i686-elf-gcc -c $(SRC_DIR)/$(INPUT) \
+		-o $(BUILD_DIR)/input.o \
+		-std=gnu99 \
+		-ffreestanding \
+		-O2 \
+		-Wall \
+		-Wextra \
+		-I$(SRC_DIR)/libc/include
+
 	i686-elf-gcc \
 		-T $(SRC_DIR)/$(LINKER) \
 		-o $(BUILD_DIR)/bsos \
@@ -54,6 +66,7 @@ build:
 		$(BUILD_DIR)/kernel.o \
 		$(BUILD_DIR)/display.o \
 		$(BUILD_DIR)/string.o \
+		$(BUILD_DIR)/input.o \
 		-lgcc
 
 	mkdir -p $(ISO_DIR)/boot/grub

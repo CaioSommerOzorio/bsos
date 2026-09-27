@@ -6,6 +6,7 @@
 #include <display.h>
 #include <string.h>
 #include <input.h>
+#include <bslang.h>
 
 #if defined(__linx__)
 #error "just use a cross compiler bro"
@@ -20,11 +21,21 @@ void kernel_main(void) {
   terminal_initialize();
 
   terminal_writestring("Hello, world!\n");
-  char c;
+  char command[32];
+  char input;
 
   while (1) {
-    c = getchar();
-
-    terminal_putchar(c);
+    input = getchar();
+    if (!(input == '\n' || input == '\b')) {
+      if (strlen(command) < 32) {
+        command[strlen(command)] = input;
+      }
+    }
+    terminal_putchar(input);
+    if (input == '\n') {
+      testfunc();
+      bslang(command);
+      memset(&command, 0, 32);
+    }
   }
 }

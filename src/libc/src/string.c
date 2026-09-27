@@ -12,10 +12,17 @@ size_t strlen(const char* str) {
 }
 
 bool strcmp(const char* str, const char* str2) {
-  for (size_t i = 0; i < strlen(str); i++) {
+  size_t smallest_string = strlen(str) < strlen(str2) ? strlen(str) : strlen(str2);
+  for (size_t i = 0; i < smallest_string; i++) {
     if (str[i] != str2[i]) {
       return false;
     }
   }
   return true;
+}
+
+void memset(void* ptr, int value, size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    ((char*)ptr)[i] = value;
+  }
 }

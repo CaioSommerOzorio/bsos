@@ -11,6 +11,7 @@ LIBC_SRC = libc/src
 DISPLAY = $(LIBC_SRC)/display.c
 STRING = $(LIBC_SRC)/string.c
 INPUT = $(LIBC_SRC)/input.c
+BSLANG = $(LIBC_SRC)/bslang.c
 
 .PHONY: build run clean
 
@@ -56,6 +57,15 @@ build:
 		-Wextra \
 		-I$(SRC_DIR)/libc/include
 
+	i686-elf-gcc -c $(SRC_DIR)/$(BSLANG) \
+		-o $(BUILD_DIR)/bslang.o \
+		-std=gnu99 \
+		-ffreestanding \
+		-O2 \
+		-Wall \
+		-Wextra \
+		-I$(SRC_DIR)/libc/include
+
 	i686-elf-gcc \
 		-T $(SRC_DIR)/$(LINKER) \
 		-o $(BUILD_DIR)/bsos \
@@ -67,6 +77,7 @@ build:
 		$(BUILD_DIR)/display.o \
 		$(BUILD_DIR)/string.o \
 		$(BUILD_DIR)/input.o \
+		$(BUILD_DIR)/bslang.o \
 		-lgcc
 
 	mkdir -p $(ISO_DIR)/boot/grub

@@ -1,17 +1,26 @@
 #include <stdint.h>
 
+// inb is the assembly instructino to read a byte from io port
 static inline uint8_t inb(uint16_t port) {
   uint8_t result;
+  // %1 and %0 are placeholder registers, gcc will fill them in
+  // pipe accumulator register (al) into result
+  // d means register dx, N is just for optimization for allowing a cusotm/immediate value
   asm volatile ("inb %1, %0" : "=a" (result) : "dN" (port));
   return result;
 }
 
 uint8_t keyboard_get_scancode(void) {
+  // exists loop when port 0x64 bit 0 becomes 1
+  // means there is input
   while (!(inb(0x64) & 1));
 
+  // reads port 0x60 for character
   return inb(0x60);
 }
 
+// cheatsheet:
+// https://www.millisecond.com/support/docs/current/html/language/scancodes.htm
 char scancode_to_ascii(uint8_t scancode) {
   switch (scancode) {
     case 0x1E: return 'a';
@@ -40,19 +49,19 @@ char scancode_to_ascii(uint8_t scancode) {
     case 0x2D: return 'x';
     case 0x15: return 'y';
     case 0x2C: return 'z';
-    case 0x39: return '0';
-    case 0x3A: return '1';
-    case 0x3B: return '2';
-    case 0x3C: return '3';
-    case 0x3D: return '4';
-    case 0x3E: return '5';
-    case 0x3F: return '6';
-    case 0x40: return '7';
-    case 0x41: return '8';
-    case 0x42: return '9';
-    case 0x2A: return ' ';
+    case 0x39: return ' ';
+    case 0x0B: return '0';
+    case 0x02: return '1';
+    case 0x03: return '2';
+    case 0x04: return '3';
+    case 0x05: return '4';
+    case 0x06: return '5';
+    case 0x07: return '6';
+    case 0x08: return '7';
+    case 0x09: return '8';
+    case 0x0A: return '9';
     case 0x1C: return '\n';
-    case 0x45: return '\b';
+    case 0X0E: return '\b';
     default: return 0;
   }
 }

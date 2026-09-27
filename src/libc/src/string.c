@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "string.h"
 
@@ -8,4 +9,13 @@ size_t strlen(const char* str) {
     len++;
   }
   return len;
+}
+
+bool strcmp(const char* str, const char* str2) {
+  for (size_t i = 0; i < strlen(str); i++) {
+    if (str[i] != str2[i]) {
+      return false;
+    }
+  }
+  return true;
 }

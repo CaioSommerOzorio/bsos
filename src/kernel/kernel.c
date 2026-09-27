@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// Custom lib files
 #include <display.h>
 #include <string.h>
 #include <input.h>
@@ -14,6 +15,7 @@
 #error "wrong conpiler bro use ix86-elf"
 #endif
 
+// Kernel entry point
 void kernel_main(void) {
   terminal_initialize();
 

@@ -28,7 +28,7 @@ void kernel_main(void *multiboot_info) {
   while (1) {
     input = getchar();
     if (input != '\n') {
-      if (strlen(command) < 32) {
+      if (strlen(command) < 32 && !(strlen(command) == 0 && input == '\b')) {
         command[strlen(command)] = input;
         terminal_putchar(input);
       }

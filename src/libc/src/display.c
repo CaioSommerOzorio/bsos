@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "string.h"
 #include "display.h"
@@ -22,6 +23,16 @@ static uint16_t vga_entry(unsigned char c, uint8_t color) {
 
 static inline void outb(uint16_t port, uint8_t value) {
   __asm__ volatile ("outb %1, %0" : : "dN" (port), "a" (value));
+}
+
+void scrolldown() {
+  for (size_t y = 0; y < VGA_HEIGHT; y++) {
+    for (size_t x = 0; x < VGA_WIDTH; x++) {
+      const size_t index = y * VGA_WIDTH + x;
+      const size_t index2 = (y + 1) * VGA_WIDTH + x;
+      terminal_buffer[index] = terminal_buffer[index2];
+    }
+  }
 }
 
 void update_cursor(uint8_t x, uint8_t y) {
@@ -53,7 +64,12 @@ void terminal_setcolor(uint8_t color) {
 void terminal_putchar(char c) {
   if (c == '\n') {
     terminal_column = 0;
-    terminal_row++;
+    if (terminal_row == VGA_HEIGHT - 1) {
+      scrolldown();
+    }
+    else {
+      terminal_row++;
+    }
   }
   else if (c == '\b') {
     if (terminal_column > 0) {

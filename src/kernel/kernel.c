@@ -17,11 +17,8 @@
 #endif
 
 // Kernel entry point
-void kernel_main(char character) {
+void kernel_main(void *multiboot_info) {
   terminal_initialize();
-
-  terminal_writestring("Multiboot info: ");
-  terminal_putchar(character);
 
   terminal_writestring("\nWelcome to bsOS!\n");
   terminal_writestring(": ");

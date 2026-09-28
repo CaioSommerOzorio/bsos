@@ -10,6 +10,11 @@ void commandline_execute(char command[32]) {
   if (strcmp(command, "clear") == true) {
     terminal_initialize();
   }
+  // make file
+  // make folder
+  // text editor
+  // help
+  //
   else {
     terminal_writestring("Unkown command: ");
     terminal_writestring(command);

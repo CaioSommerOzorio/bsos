@@ -23,13 +23,13 @@ struct multiboot_tag {
 
 // Multiboot info gets passed in
 void kernel_main(void* mb_info) {
-  terminal_initialize();
+  terminal_init();
 
   struct multiboot_tag* first_tag = (struct multiboot_tag*)((char* )mb_info + 8);
-  terminal_writestring((char*)first_tag->tag);
+  prints((char*)first_tag->tag);
 
-  terminal_writestring("\nWelcome to bsOS!\n");
-  terminal_writestring(": ");
+  prints("\nWelcome to bsOS!\n");
+  prints(": ");
   char command[32];
   size_t command_len = 0;
   char input;
@@ -47,11 +47,11 @@ void kernel_main(void* mb_info) {
           command[command_len-1] = '\0';
           command_len--;
         }
-        terminal_putchar(input);
+        putchar(input);
       }
     }
     else {
-      terminal_putchar(input);
+      putchar(input);
       commandline_execute(command);
       memset(&command, 0, 32);
       command_len = 0;

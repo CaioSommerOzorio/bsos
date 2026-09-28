@@ -8,7 +8,7 @@
 
 void commandline_execute(char command[32]) {
   if (strcmp(command, "clear") == true) {
-    terminal_initialize();
+    terminal_init();
   }
   // make file
   // make folder
@@ -16,9 +16,9 @@ void commandline_execute(char command[32]) {
   // help
   //
   else {
-    terminal_writestring("Unkown command: ");
-    terminal_writestring(command);
-    terminal_writestring("\n");
+    prints("Unkown command: ");
+    prints(command);
+    prints("\n");
   }
-  terminal_writestring(": ");
+  prints(": ");
 }

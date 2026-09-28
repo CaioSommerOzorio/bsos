@@ -43,7 +43,7 @@ void update_cursor(uint8_t x, uint8_t y) {
   outb(0x3D5, pos);
 }
 
-void terminal_initialize(void) {
+void terminal_init(void) {
   terminal_row = 0;
   terminal_column = 0;
 
@@ -61,7 +61,26 @@ void terminal_setcolor(uint8_t color) {
   terminal_color = color;
 }
 
-void terminal_putchar(char c) {
+void print_uint(uint32_t n) {
+  char buf[11];
+  int i = 0;
+
+  if (n == 0) {
+    putchar('0');
+    return;
+  }
+
+  while (n > 0) {
+    buf[i++] = '0' + n % 10;
+    n /= 10;
+  }
+
+  while (i > 0) {
+    putchar(buf[--i]);
+  }
+}
+
+void putchar(char c) {
   if (c == '\n') {
     terminal_column = 0;
     if (terminal_row == VGA_HEIGHT - 1) {
@@ -74,7 +93,7 @@ void terminal_putchar(char c) {
   else if (c == '\b') {
     if (terminal_column > 0) {
       terminal_column--;
-      terminal_putchar(' ');
+      putchar(' ');
       terminal_column--;
     }
     else {
@@ -97,11 +116,11 @@ void terminal_putchar(char c) {
   update_cursor(terminal_column, terminal_row);
 }
 
-void terminal_write(const char* data, size_t size) {
+void write(const char* data, size_t size) {
   for (size_t i = 0; i < size; i++)
-    terminal_putchar(data[i]);
+    putchar(data[i]);
 }
 
-void terminal_writestring(const char* data) {
-  terminal_write(data, strlen(data));
+void prints(const char* data) {
+  write(data, strlen(data));
 }

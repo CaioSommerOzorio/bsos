@@ -27,10 +27,11 @@ enum vga_color {
     VGA_COLOR_WHITE = 15,
 };
 
-void terminal_initialize(void);
+void terminal_init(void);
 void terminal_setcolor(uint8_t color);
-void terminal_putchar(char c);
-void terminal_write(const char* data, size_t size);
-void terminal_writestring(const char* data);
+void putchar(char c);
+void write(const char* data, size_t size);
+void prints(const char* data);
+void print_uint(uint32_t n);
 
 #endif

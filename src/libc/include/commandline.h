@@ -1,12 +1,11 @@
-#ifndef BSLANG_H
-#define BSLANG_H
+#ifndef COMMANDLINE_H
+#define COMMANDLINE_H
 
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
-void bslang(char command[32]);
-void testfunc(void);
+void commandline_execute(char command[32]);
 
 #endif

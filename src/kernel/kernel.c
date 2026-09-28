@@ -16,27 +16,45 @@
 #error "wrong conpiler bro use ix86-elf"
 #endif
 
-// Kernel entry point
-void kernel_main(void *multiboot_info) {
+struct multiboot_tag {
+  size_t tag;
+  size_t size;
+};
+
+// Multiboot info gets passed in
+void kernel_main(void* mb_info) {
   terminal_initialize();
+
+  struct multiboot_tag* first_tag = (struct multiboot_tag*)((char* )mb_info + 8);
+  terminal_writestring((char*)first_tag->tag);
 
   terminal_writestring("\nWelcome to bsOS!\n");
   terminal_writestring(": ");
   char command[32];
+  size_t command_len = 0;
   char input;
 
   while (1) {
     input = getchar();
     if (input != '\n') {
+      // can't be buffer overflow and can't backspace if there is no input yet
       if (strlen(command) < 32 && !(strlen(command) == 0 && input == '\b')) {
-        command[strlen(command)] = input;
+        if (input != '\b') {
+          command[command_len] = input;
+          command_len++;
+        }
+        else {
+          command[command_len-1] = '\0';
+          command_len--;
+        }
         terminal_putchar(input);
       }
     }
-    if (input == '\n') {
+    else {
       terminal_putchar(input);
       commandline_execute(command);
       memset(&command, 0, 32);
+      command_len = 0;
     }
   }
 }

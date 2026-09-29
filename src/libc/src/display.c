@@ -61,7 +61,26 @@ void terminal_setcolor(uint8_t color) {
   terminal_color = color;
 }
 
-void print_uint(uint32_t n) {
+void print_uint64(uint64_t n) {
+  char buf[20];
+  int i = 0;
+
+  if (n == 0) {
+    putchar('0');
+    return;
+  }
+
+  while (n > 0) {
+    buf[i++] = '0' + n % 10;
+    n /= 10;
+  }
+
+  while (i > 0) {
+    putchar(buf[--i]);
+  }
+}
+
+void print_sizet(size_t n) {
   char buf[11];
   int i = 0;
 

@@ -6,6 +6,5 @@
 
 size_t strlen(const char* str);
 bool strcmp(const char* str, const char* str2);
-void memset(void* ptr, int value, size_t num);
 
 #endif

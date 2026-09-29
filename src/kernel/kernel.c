@@ -6,7 +6,8 @@
 #include <display.h>
 #include <string.h>
 #include <input.h>
-#include <commandline.h>
+#include <bshell.h>
+#include <memory.h>
 
 #if defined(__linx__)
 #error "just use a cross compiler bro"
@@ -16,17 +17,32 @@
 #error "wrong conpiler bro use ix86-elf"
 #endif
 
-struct multiboot_tag {
-  size_t tag;
-  size_t size;
-};
-
-// Multiboot info gets passed in
 void kernel_main(void* mb_info) {
   terminal_init();
 
-  struct multiboot_tag* first_tag = (struct multiboot_tag*)((char* )mb_info + 8);
-  prints((char*)first_tag->tag);
+  struct mb_tag *tag =
+    (struct mb_tag*)((char *)mb_info + 8);
+
+  while (tag->type != 0) {
+    if (tag->type == 6) {
+      struct mmap_entry *mmap =
+        (struct mmap_entry *)((char *)tag+16);
+      while ((char*)mmap < (char *)tag + tag->size) {
+        prints("Address: ");
+        print_uint64(mmap->addr);
+        prints("\nLength: ");
+        print_uint64(mmap->len);
+        prints("\nType: ");
+        print_uint64(mmap->type);
+        prints("\n\n");
+        mmap =
+          (struct mmap_entry *)((char *)mmap + tag->entry_size);
+      }
+    }
+
+    tag = (struct mb_tag *)
+      ((char *)tag + ((tag->size + 7) & ~7));
+  }
 
   prints("\nWelcome to bsOS!\n");
   prints(": ");

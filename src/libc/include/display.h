@@ -32,6 +32,7 @@ void terminal_setcolor(uint8_t color);
 void putchar(char c);
 void write(const char* data, size_t size);
 void prints(const char* data);
-void print_uint(uint32_t n);
+void print_sizet(size_t n);
+void print_uint64(uint64_t n);
 
 #endif

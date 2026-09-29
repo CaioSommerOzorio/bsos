@@ -2,23 +2,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "commandline.h"
-#include "display.h"
 #include "string.h"
+#include "display.h"
 
 void commandline_execute(char command[32]) {
-  if (strcmp(command, "clear") == true) {
+  if (strcmp(command, "clear")) {
     terminal_init();
   }
-  // make file
-  // make folder
-  // text editor
-  // help
-  //
   else {
-    prints("Unkown command: ");
+    prints("Unknown command: ");
     prints(command);
     prints("\n");
   }
   prints(": ");
 }
+

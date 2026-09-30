@@ -18,34 +18,27 @@
 #endif
 
 void kernel_main(void* mb_info) {
+  struct mmap_entry usable_mem[32];
+  size_t mm_count = parse_mmap(mb_info, usable_mem, 32);
+
   terminal_init();
 
-  struct mb_tag *tag =
-    (struct mb_tag*)((char *)mb_info + 8);
-
-  while (tag->type != 0) {
-    if (tag->type == 6) {
-      struct mmap_entry *mmap =
-        (struct mmap_entry *)((char *)tag+16);
-      while ((char*)mmap < (char *)tag + tag->size) {
-        prints("Address: ");
-        print_uint64(mmap->addr);
-        prints("\nLength: ");
-        print_uint64(mmap->len);
-        prints("\nType: ");
-        print_uint64(mmap->type);
-        prints("\n\n");
-        mmap =
-          (struct mmap_entry *)((char *)mmap + tag->entry_size);
-      }
-    }
-
-    tag = (struct mb_tag *)
-      ((char *)tag + ((tag->size + 7) & ~7));
+  prints("Memory map\n====================================\n");
+  prints("Number of usable memory segments: ");
+  print_sizet(mm_count);
+  prints("\n\n");
+  for (size_t i = 0; i < mm_count; i++) {
+    prints("Memory number ");
+    print_sizet(i);
+    prints(": \nAddress: ");
+    print_uint64(usable_mem[i].addr);
+    prints("\nLength: ");
+    print_uint64(usable_mem[i].len);
+    prints("\n\n");
   }
 
-  prints("\nWelcome to bsOS!\n");
-  prints(": ");
+  prints("Welcome to bsOS!");
+  prints("\n: ");
   char command[32];
   size_t command_len = 0;
   char input;

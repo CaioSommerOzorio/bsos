@@ -23,7 +23,7 @@ bool strcmp(const char* str, const char* str2) {
   return true;
 }
 
-char* intotstring(const char*) {
+char* inttostring(const char*) {
   char* str;
   return str;
 }

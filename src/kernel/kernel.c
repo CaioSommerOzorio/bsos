@@ -18,8 +18,8 @@
 #endif
 
 void kernel_main(void* mb_info) {
-  struct mmap_entry usable_mem[32];
-  size_t mm_count = parse_mmap(mb_info, usable_mem, 32);
+  struct mmap_entry mem_sectors[32];
+  size_t mm_count = parse_mmap(mb_info, mem_sectors, 32);
 
   terminal_init();
 
@@ -31,11 +31,31 @@ void kernel_main(void* mb_info) {
     prints("Memory number ");
     print_sizet(i);
     prints(": \nAddress: ");
-    print_uint64(usable_mem[i].addr);
+    print_uint64(mem_sectors[i].addr);
     prints("\nLength: ");
-    print_uint64(usable_mem[i].len);
+    print_uint64(mem_sectors[i].len);
     prints("\n\n");
   }
+
+  // Testing malloc like behavior
+  prints("Attempting to initalize memory...\n");
+  mem_init(mem_sectors, mm_count);
+  prints("Attempting to allocate memory...\n");
+  char *mem = mem_hold(6);
+  prints("Attemping to write data...\n");
+  mem[0] = 'H';
+  mem[1] = 'e';
+  mem[2] = 'l';
+  mem[3] = 'l';
+  mem[4] = 'o';
+  mem[5] = '\0';
+  prints("Attemping to print data: ");
+  prints(mem);
+  prints("\nAttempting to free memory...\n");
+  mem_free(mem, 6);
+  prints("Checking if memory is free...\n");
+  display_mem();
+  prints("\n\n");
 
   prints("Welcome to bsOS!");
   prints("\n: ");

@@ -7,5 +7,6 @@
 #include <string.h>
 
 void commandline_execute(char command[32]);
+void waitforinput(void);
 
 #endif

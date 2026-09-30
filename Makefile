@@ -96,7 +96,9 @@ build:
 	cp $(BUILD_DIR)/bsos $(ISO_DIR)/boot/bsos
 	cp $(SRC_DIR)/$(GRUBCONFIG) $(ISO_DIR)/boot/grub/grub.cfg
 
-	grub-mkrescue -o $(BUILD_DIR)/bsos.iso $(ISO_DIR)
+	grub-mkrescue \
+	  -o $(BUILD_DIR)/bsos.iso \
+	  $(ISO_DIR)
 
 run:
 	qemu-system-i386 \

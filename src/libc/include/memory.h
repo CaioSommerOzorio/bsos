@@ -47,5 +47,6 @@ void list_init(struct list *list, uint32_t size, uint32_t entry_size);
 void list_push(struct list *list, void *entry);
 void list_pop(struct list *list);
 void *list_at(struct list *list, uint32_t index);
+void list_insert(struct list *list, uint32_t index, void *entry);
 
 #endif

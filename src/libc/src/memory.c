@@ -35,9 +35,10 @@ void mem_move(void* src, void* dest, size_t size) {
 void move_right(void *array, size_t size, size_t index, size_t element_size) {
   char *arr = (char *)array;
   for (size_t i = size - 1; i > index; i--) {
-    for (size_t j = 0; j < element_size; j++) {
-      arr[i * element_size + j] = arr[(i - 1) * element_size + j];
-    }
+    //for (size_t j = 0; j < element_size; j++) {
+    //  arr[i * element_size + j] = arr[(i - 1) * element_size + j];
+    //}
+    mem_move(arr + (i - 1) * element_size, arr + i * element_size, element_size);
   }
 }
 
@@ -116,7 +117,6 @@ size_t last_free_mem_segment() {
 // if the pointer > prev.addr+len and pointer+len < current.addr, then the pointer is somewhere between
 // so we copy everything from current.addr on to the right and insert the free memory after prev
 void mem_free(void *ptr, size_t size) {
-  prints("MEMORY MAP TIMEEE YAYYYA\n");
   display_mem(true);
   uint64_t addr = (uint64_t)ptr;
   if (addr < free_sectors[0].addr) {
@@ -258,4 +258,15 @@ void *list_at(struct list *list, uint32_t index) {
     return NULL;
   }
   return list->addr + (index * list->entry_size);
+}
+
+void list_insert(struct list *list, uint32_t index, void *entry) {
+  if (list->item_count == list->size) {
+    // we need to allocate more memory
+    // let's just use the same function as in list_push
+    // it's gonna get overwriten anyway so who cares what entry gets appended
+    list_push(list, entry);
+  }
+  move_right(list->addr, list->item_count, index, list->entry_size);
+  mem_copy(entry, list->addr + index * list->entry_size, list->entry_size);
 }

@@ -265,8 +265,15 @@ void list_insert(struct list *list, uint32_t index, void *entry) {
     // we need to allocate more memory
     // let's just use the same function as in list_push
     // it's gonna get overwriten anyway so who cares what entry gets appended
+    // also it increases the item_count by 1 for us
     list_push(list, entry);
   }
   move_right(list->addr, list->item_count, index, list->entry_size);
   mem_copy(entry, list->addr + index * list->entry_size, list->entry_size);
+}
+
+void list_remove(struct list *list, uint32_t index) {
+  move_left(list->addr, list->item_count, index, list->entry_size);
+  list_pop(list);
+  list->item_count--;
 }

@@ -11,6 +11,13 @@ void clear(void) {
   terminal_init();
 }
 
+// in order of implementation :)
+void help(void) {
+  prints("clear - clears the screen\n");
+  prints("memory - shows all available memory\n");
+  prints("help - shows this help message\n");
+}
+
 void commandline_execute(char command[32]) {
   if (strlen(command) == 0) {
     prints("Please enter a command\n\n: ");
@@ -24,6 +31,11 @@ void commandline_execute(char command[32]) {
     note("Press enter to read next memory segment, q to exit");
     display_mem(true);
     note("You are using bsOS");
+  }
+  else if (strcmp(buff, "help")) {
+    help();
+    buff = after_character(command, ' ', 32);
+    prints(buff);
   }
   else {
     prints("Unknown command: ");

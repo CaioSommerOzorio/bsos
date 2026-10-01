@@ -50,3 +50,12 @@ char *before_character(char *string, char c, size_t size) {
 
   return buff;
 }
+
+char* after_character(char* string, char c, size_t size) {
+  static char buff[32];
+  size_t i;
+  for (i = 0; i < size && string[i] != c && string[i] != '\0'; i++) {
+    buff[i] = string[i];
+  }
+  buff[i] = '\0';
+}

@@ -73,6 +73,7 @@ void mem_init(struct mmap_entry mem_sectors[32], size_t mm_count) {
     free_sectors[i].addr = mem_sectors[i].addr;
     free_sectors[i].len = mem_sectors[i].len;
   }
+  compress_free_mem(free_sectors, 32);
 }
 
 // mem_hold(size) -> returns pointer to the memory segment
@@ -95,6 +96,19 @@ void *mem_hold(size_t size) {
   return NULL;
 }
 
+// diabolical naming
+size_t last_free_mem_segment() {
+  size_t last = 0;
+  for (size_t i = 0; i < 32; i++) {
+    if (free_sectors[i].len != 0) {
+      return last-1;
+    }
+
+    last = i;
+  }
+  return last;
+}
+
 // mem_free(ptr, size)
 // we go through the array of free memory segments
 // if the pointer is at length+addr of the segment we're looking at, we just add size to length of the segment
@@ -102,35 +116,32 @@ void *mem_hold(size_t size) {
 // if the pointer > prev.addr+len and pointer+len < current.addr, then the pointer is somewhere between
 // so we copy everything from current.addr on to the right and insert the free memory after prev
 void mem_free(void *ptr, size_t size) {
-  if ((uint64_t) ptr <= free_sectors[0].addr) {
+  prints("MEMORY MAP TIMEEE YAYYYA\n");
+  display_mem(true);
+  uint64_t addr = (uint64_t)ptr;
+  if (addr < free_sectors[0].addr) {
     // if we get here it means the memory is before the first entry
     // which means we need to add an entry before the first entry
     move_right(free_sectors, 32, 0, sizeof(struct free_mem));
     free_sectors[0].len = size;
-    free_sectors[0].addr = (uint64_t)ptr;
+    free_sectors[0].addr = addr;
     compress_free_mem(free_sectors, 32);
     return;
   }
   for (size_t i = 0; i < 31; i++) {
-    if ((uint64_t)ptr == free_sectors[i].addr+free_sectors[i].len) {
+    if (addr == free_sectors[i].addr+free_sectors[i].len) {
       free_sectors[i].len += size;
       break;
     }
-    else if ((uint64_t)ptr+size == free_sectors[i].addr) {
+    else if (addr+size == free_sectors[i].addr) {
       free_sectors[i].len += size;
       free_sectors[i].addr -= size;
       break;
     }
-    else if (ptr > free_sectors[i].addr+free_sectors[i].len && ptr+size < free_sectors[i+1].addr && i != 31) {
-      // will get rid of this later but for now
-      // good for debugging
-      if (i == 31) {
-        prints("\nout of memory\n");
-        break;
-      }
+    else if (addr > free_sectors[i].addr+free_sectors[i].len && addr+size < free_sectors[i+1].addr && i != 31) {
       move_right(free_sectors, 32, i, sizeof(struct free_mem));
-      free_sectors[i].addr = (uint64_t)ptr;
-      free_sectors[i].len = size;
+      free_sectors[i + 1].addr = addr;
+      free_sectors[i + 1].len = size;
       break;
     }
   }
@@ -201,4 +212,50 @@ void display_mem(bool wait) {
       }
     }
   }
+}
+
+void list_init(struct list *list, uint32_t size, uint32_t entry_size) {
+  list->size = size;
+  list->entry_size = entry_size;
+  list->item_count = 0;
+  list->addr = mem_hold(entry_size * size);
+}
+
+void list_push(struct list *list, void *entry) {
+  if (list->item_count == list->size) {
+    // need to allocate bigger memory
+    // for now double the size
+    mem_free(list->addr, list->entry_size * list->size);
+    list->size *= 2;
+    void* old_addr = list->addr;
+    list->addr = mem_hold(list->entry_size * list->size);
+    if (list->addr = NULL) {
+      // not enough memory to double size, we just increase by one
+      list->size = (list->size / 2) + 1;
+      list->addr = mem_hold(list->entry_size * list->size);
+      if (list->addr == NULL) {
+        // we actually have no memory left even for one more puny element
+        return;
+      }
+    }
+    mem_move(old_addr, list->addr, list->entry_size * list->item_count);
+  }
+  // add element
+  mem_copy(entry, list->addr + list->item_count * list->entry_size, list->entry_size);
+  list->item_count++;
+}
+
+void list_pop(struct list *list) {
+  if (list->item_count == 0) {
+    return;
+  }
+  list->item_count--;
+  mem_set(list->addr + list->item_count * list->entry_size, 0, list->entry_size);
+}
+
+void *list_at(struct list *list, uint32_t index) {
+  if (list->item_count == 0) {
+    return NULL;
+  }
+  return list->addr + (index * list->entry_size);
 }

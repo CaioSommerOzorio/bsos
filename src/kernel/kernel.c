@@ -25,11 +25,11 @@ void kernel_main(void* mb_info) {
   terminal_init();
 
   note("You are using bsOS");
-
   display_mem(false);
-
   prints("Welcome to bsOS!");
+
   prints("\n: ");
+
   char command[32];
   size_t command_len = 0;
   char input;
@@ -50,8 +50,9 @@ void kernel_main(void* mb_info) {
         putchar(input);
       }
     }
+    // enter runs command
     else {
-      putchar(input);
+      putchar('\n');
       commandline_execute(command);
       mem_set(&command, 0, 32);
       command_len = 0;

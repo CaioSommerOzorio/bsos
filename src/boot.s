@@ -30,9 +30,6 @@ stack_top:
 _start:
 	mov $stack_top, %esp
 
-  mov $0xB8000, %edi
-  mov $0x1F41, (%edi)
-
   push %ebx
 	call kernel_main
 

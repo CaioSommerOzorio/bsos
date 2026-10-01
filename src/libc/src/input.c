@@ -1,7 +1,6 @@
 #include <stdint.h>
 
-// inb is the assembly instructino to read a byte from io port
-static inline uint8_t inb(uint16_t port) {
+uint8_t inb(uint16_t port) {
   uint8_t result;
   // %1 and %0 are placeholder registers, gcc will fill them in
   // pipe accumulator register (al) into result

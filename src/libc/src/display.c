@@ -9,7 +9,6 @@ static size_t terminal_row;
 static size_t terminal_column;
 static uint8_t terminal_color;
 
-// Define vga memory
 static uint16_t* const terminal_buffer =
   (uint16_t*)VGA_MEMORY;
 
@@ -25,6 +24,7 @@ static inline void outb(uint16_t port, uint8_t value) {
   __asm__ volatile ("outb %1, %0" : : "dN" (port), "a" (value));
 }
 
+// Moves all the text up except for the last row (note row)
 void scrolldown(void) {
   for (size_t y = 0; y < VGA_HEIGHT - 2; y++) {
     for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -39,6 +39,7 @@ void scrolldown(void) {
   }
 }
 
+// Changes cursor position
 void update_cursor(uint8_t x, uint8_t y) {
   uint16_t pos = y * VGA_WIDTH + x;
   outb(0x3D4, 14);
@@ -104,6 +105,7 @@ void print_sizet(size_t n) {
 }
 
 void putchar(char c) {
+  // Newline
   if (c == '\n') {
     terminal_column = 0;
     if (terminal_row == VGA_HEIGHT - 2) {
@@ -113,6 +115,7 @@ void putchar(char c) {
       terminal_row++;
     }
   }
+  // Backspace
   else if (c == '\b') {
     if (terminal_column > 0) {
       terminal_column--;
@@ -126,6 +129,7 @@ void putchar(char c) {
       }
     }
   }
+  // Normal character
   else {
     const size_t index = terminal_row * VGA_WIDTH + terminal_column;
     terminal_buffer[index] = vga_entry(c, terminal_color);

@@ -20,22 +20,13 @@
 void kernel_main(void* mb_info) {
   struct mmap_entry mem_sectors[32];
   size_t mm_count = parse_mmap(mb_info, mem_sectors, 32);
+  mem_init(mem_sectors, mm_count);
 
   terminal_init();
 
-  prints("Memory map\n====================================\n");
-  prints("Number of usable memory segments: ");
-  print_sizet(mm_count);
-  prints("\n\n");
-  for (size_t i = 0; i < mm_count; i++) {
-    prints("Memory number ");
-    print_sizet(i);
-    prints(": \nAddress: ");
-    print_uint64(mem_sectors[i].addr);
-    prints("\nLength: ");
-    print_uint64(mem_sectors[i].len);
-    prints("\n\n");
-  }
+  note("You are using bsOS");
+
+  display_mem(false);
 
   prints("Welcome to bsOS!");
   prints("\n: ");

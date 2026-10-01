@@ -23,7 +23,30 @@ bool strcmp(const char* str, const char* str2) {
   return true;
 }
 
-char* inttostring(const char*) {
+char *inttostring(const char*) {
   char* str;
   return str;
+}
+
+void string_replace(char* string, char target, char replacement, size_t size) {
+  size_t i = 0;
+  for (size_t i = 0; i < size; i++) {
+    if (string[i] == target) {
+      string[i] = replacement;
+    }
+  }
+}
+
+
+// returns everything before the character
+char *before_character(char *string, char c, size_t size) {
+  static char buff[32];
+  size_t i;
+
+  for (i = 0; i < size && string[i] != c && string[i] != '\0'; i++) {
+    buff[i] = string[i];
+  }
+  buff[i] = '\0';
+
+  return buff;
 }

@@ -34,5 +34,6 @@ void write(const char* data, size_t size);
 void prints(const char* data);
 void print_sizet(size_t n);
 void print_uint64(uint64_t n);
+void note(const char* string);
 
 #endif

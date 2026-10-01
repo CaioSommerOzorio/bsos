@@ -5,6 +5,7 @@
 #include "memory.h"
 #include "display.h"
 #include "bshell.h"
+#include "input.h"
 
 struct free_mem free_sectors[32];
 
@@ -23,10 +24,6 @@ void mem_copy(const void* src, void* dest, size_t size) {
 void mem_move(void* src, void* dest, size_t size) {
   mem_copy(src, dest, size);
   mem_set(src, 0, size);
-}
-
-void meminit(void *memory_sector) {
-  mem_set(memory_sector, 0, 4096);
 }
 
 // moves all elements from index to the right
@@ -56,7 +53,6 @@ void move_left(void *array, size_t size, size_t index, size_t element_size) {
 // compress_free_mem()
 // this will find any free memory segments that are adjacent and merge them
 void compress_free_mem(struct free_mem *free_mem, size_t size) {
-  display_mem();
   for (size_t i = 0; i < size - 1; ) {
     if (free_mem[i].addr + free_mem[i].len == free_mem[i + 1].addr && free_mem[i].len != 0) {
       free_mem[i].len += free_mem[i + 1].len;
@@ -69,7 +65,7 @@ void compress_free_mem(struct free_mem *free_mem, size_t size) {
   }
 }
 
-// mem_init(mem_secotrs, mm_count)
+// mem_init(mem_sectors, mm_count)
 // we go through all the memory segments and make an array of some struct free_mem that holds the address and size of that memory segment
 void mem_init(struct mmap_entry mem_sectors[32], size_t mm_count) {
   mem_set(free_sectors, 0, 32*sizeof(struct free_mem));
@@ -181,18 +177,28 @@ size_t parse_mmap(void *mb_info, struct mmap_entry *usable_mem, size_t max_entri
 
 
 // visualizes free memory sectors
-void display_mem(void) {
+void display_mem(bool wait) {
+  prints("Memory map\n====================================\n");
   for (size_t i = 0; i < 32; i++) {
-    if (free_sectors[i].len == 0) {
-      break;
-    }
     prints("Memory number ");
     print_sizet(i);
-    prints(": \nAddress: ");
+    prints("\nAddress: ");
     print_uint64(free_sectors[i].addr);
     prints("\nLength: ");
     print_uint64(free_sectors[i].len);
     prints("\n\n");
-    waitforinput();
+
+    if (free_sectors[i+1].len == 0) {
+      print_sizet(i+1);
+      prints(" free sectors found.\n\n");
+      break;
+    }
+
+    if (wait) {
+      size_t returnval = waitforinput();
+      if (returnval == 1) {
+        return;
+      }
+    }
   }
 }

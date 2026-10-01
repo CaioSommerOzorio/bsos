@@ -25,13 +25,17 @@ static inline void outb(uint16_t port, uint8_t value) {
   __asm__ volatile ("outb %1, %0" : : "dN" (port), "a" (value));
 }
 
-void scrolldown() {
-  for (size_t y = 0; y < VGA_HEIGHT; y++) {
+void scrolldown(void) {
+  for (size_t y = 0; y < VGA_HEIGHT - 2; y++) {
     for (size_t x = 0; x < VGA_WIDTH; x++) {
       const size_t index = y * VGA_WIDTH + x;
       const size_t index2 = (y + 1) * VGA_WIDTH + x;
       terminal_buffer[index] = terminal_buffer[index2];
     }
+  }
+  // clear row above note
+  for (size_t x = 0; x < VGA_WIDTH; x++) {
+    terminal_buffer[(VGA_HEIGHT - 2) * VGA_WIDTH + x] = vga_entry(' ', terminal_color);
   }
 }
 
@@ -102,7 +106,7 @@ void print_sizet(size_t n) {
 void putchar(char c) {
   if (c == '\n') {
     terminal_column = 0;
-    if (terminal_row == VGA_HEIGHT - 1) {
+    if (terminal_row == VGA_HEIGHT - 2) {
       scrolldown();
     }
     else {
@@ -129,7 +133,12 @@ void putchar(char c) {
 
     if (terminal_column == VGA_WIDTH) {
       terminal_column = 0;
-      terminal_row++;
+      if (terminal_row == VGA_HEIGHT - 2) {
+        scrolldown();
+      }
+      else{
+        terminal_row++;
+      }
     }
   }
   update_cursor(terminal_column, terminal_row);
@@ -142,4 +151,21 @@ void write(const char* data, size_t size) {
 
 void prints(const char* data) {
   write(data, strlen(data));
+}
+
+void note(const char* string) {
+  // clear previous note
+  for (size_t x = 0; x < VGA_WIDTH; x++) {
+    terminal_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = vga_entry(' ', terminal_color);
+  }
+  if (strlen(string) > VGA_WIDTH) {
+    note("Note length too long");
+  }
+  size_t row_temp = terminal_row;
+  size_t col_temp = terminal_column;
+  terminal_row = VGA_HEIGHT-1;
+  terminal_column = VGA_WIDTH - strlen(string);
+  prints(string);
+  terminal_row = row_temp;
+  terminal_column = col_temp;
 }

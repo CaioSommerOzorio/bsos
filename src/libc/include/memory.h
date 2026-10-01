@@ -25,7 +25,7 @@ struct free_mem {
   uint64_t len;
 };
 
-//size_t nof_usable_mem_segments(struct mmap_entry *mm_entry, uint32_t entry_size, uint32_t tag_size);
+
 size_t parse_mmap(void *mb_info, struct mmap_entry *usable_mem, size_t max_entries);
 void move_right(void *array, size_t size, size_t index, size_t element_size);
 void move_left(void *array, size_t size, size_t index, size_t element_size);
@@ -36,7 +36,6 @@ void mem_free(void *ptr, size_t size);
 void mem_set(void* ptr, int value, size_t size);
 void mem_copy(const void* src, void* dest, size_t size);
 void mem_move(void* src, void* dest, size_t size);
-void meminit(void *memory_sector);
-void display_mem(void);
+void display_mem(bool wait);
 
 #endif

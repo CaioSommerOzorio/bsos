@@ -37,26 +37,6 @@ void kernel_main(void* mb_info) {
     prints("\n\n");
   }
 
-  // Testing malloc like behavior
-  prints("Attempting to initalize memory...\n");
-  mem_init(mem_sectors, mm_count);
-  prints("Attempting to allocate memory...\n");
-  char *mem = mem_hold(6);
-  prints("Attemping to write data...\n");
-  mem[0] = 'H';
-  mem[1] = 'e';
-  mem[2] = 'l';
-  mem[3] = 'l';
-  mem[4] = 'o';
-  mem[5] = '\0';
-  prints("Attemping to print data: ");
-  prints(mem);
-  prints("\nAttempting to free memory...\n");
-  mem_free(mem, 6);
-  prints("Checking if memory is free...\n");
-  display_mem();
-  prints("\n\n");
-
   prints("Welcome to bsOS!");
   prints("\n: ");
   char command[32];
@@ -82,7 +62,7 @@ void kernel_main(void* mb_info) {
     else {
       putchar(input);
       commandline_execute(command);
-      memset(&command, 0, 32);
+      mem_set(&command, 0, 32);
       command_len = 0;
     }
   }

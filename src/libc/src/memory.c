@@ -8,22 +8,71 @@
 
 struct free_mem free_sectors[32];
 
+void mem_set(void* ptr, int value, size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    ((char*)ptr)[i] = value;
+  }
+}
+
+void mem_copy(const void* src, void* dest, size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    ((char*)dest)[i] = ((char*)src)[i];
+  }
+}
+
+void mem_move(void* src, void* dest, size_t size) {
+  mem_copy(src, dest, size);
+  mem_set(src, 0, size);
+}
+
+void meminit(void *memory_sector) {
+  mem_set(memory_sector, 0, 4096);
+}
+
 // moves all elements from index to the right
 // trusts that there will be no element overflow
 // if there is...
 // we lose memory
 // FOREVER
 // good luck
-size_t move_right(void *array, size_t size, size_t index) {
-  for (size_t i = size-1; i > index; i--) {
-    ((char*)array)[i] = ((char*)array)[i-1];
+void move_right(void *array, size_t size, size_t index, size_t element_size) {
+  char *arr = (char *)array;
+  for (size_t i = size - 1; i > index; i--) {
+    for (size_t j = 0; j < element_size; j++) {
+      arr[i * element_size + j] = arr[(i - 1) * element_size + j];
+    }
+  }
+}
+
+// moves everything from the right of the index one spot to the left
+// element at index will get deleted
+void move_left(void *array, size_t size, size_t index, size_t element_size) {
+  char *arr = (char *)array;
+  for (size_t i = index; i < size - 1; i++) {
+    mem_move(arr + (i + 1) * element_size, arr + i * element_size, element_size);
+  }
+}
+
+// compress_free_mem()
+// this will find any free memory segments that are adjacent and merge them
+void compress_free_mem(struct free_mem *free_mem, size_t size) {
+  display_mem();
+  for (size_t i = 0; i < size - 1; ) {
+    if (free_mem[i].addr + free_mem[i].len == free_mem[i + 1].addr && free_mem[i].len != 0) {
+      free_mem[i].len += free_mem[i + 1].len;
+      move_left(free_mem, size, i + 1, sizeof(struct free_mem));
+      size--;
+    }
+    else {
+      i++;
+    }
   }
 }
 
 // mem_init(mem_secotrs, mm_count)
 // we go through all the memory segments and make an array of some struct free_mem that holds the address and size of that memory segment
 void mem_init(struct mmap_entry mem_sectors[32], size_t mm_count) {
-  memset(free_sectors, 0, 32*sizeof(struct free_mem));
+  mem_set(free_sectors, 0, 32*sizeof(struct free_mem));
   for (size_t i = 0; i < mm_count; i++) {
     free_sectors[i].addr = mem_sectors[i].addr;
     free_sectors[i].len = mem_sectors[i].len;
@@ -37,10 +86,12 @@ void mem_init(struct mmap_entry mem_sectors[32], size_t mm_count) {
 void *mem_hold(size_t size) {
   for (size_t i = 0; i < 32; i++) {
     if (free_sectors[i].len >= size) {
-      print_uint64(free_sectors[i].addr);
       free_sectors[i].addr += size;
       free_sectors[i].len -= size;
-      return (void *)free_sectors[i].addr;
+      if (free_sectors[i].len == 0) {
+        move_left(free_sectors, 32, i, sizeof(struct free_mem));
+      }
+      return (void *)free_sectors[i].addr-size;
     }
   }
   // will comment this out later but probably good for debugging
@@ -57,34 +108,37 @@ void *mem_hold(size_t size) {
 void mem_free(void *ptr, size_t size) {
   if ((uint64_t) ptr <= free_sectors[0].addr) {
     // if we get here it means the memory is before the first entry
-    // which means we can just add it to the first entry
-    free_sectors[0].addr-=size;
-    free_sectors[0].len+=size;
+    // which means we need to add an entry before the first entry
+    move_right(free_sectors, 32, 0, sizeof(struct free_mem));
+    free_sectors[0].len = size;
+    free_sectors[0].addr = (uint64_t)ptr;
+    compress_free_mem(free_sectors, 32);
     return;
   }
   for (size_t i = 0; i < 31; i++) {
     if ((uint64_t)ptr == free_sectors[i].addr+free_sectors[i].len) {
       free_sectors[i].len += size;
-      return;
+      break;
     }
     else if ((uint64_t)ptr+size == free_sectors[i].addr) {
       free_sectors[i].len += size;
       free_sectors[i].addr -= size;
-      return;
+      break;
     }
     else if (ptr > free_sectors[i].addr+free_sectors[i].len && ptr+size < free_sectors[i+1].addr && i != 31) {
       // will get rid of this later but for now
       // good for debugging
       if (i == 31) {
         prints("\nout of memory\n");
-        return;
+        break;
       }
-      move_right(free_sectors, 32, i);
+      move_right(free_sectors, 32, i, sizeof(struct free_mem));
       free_sectors[i].addr = (uint64_t)ptr;
       free_sectors[i].len = size;
-      return;
+      break;
     }
   }
+  compress_free_mem(free_sectors, 32);
 }
 
 // returns number of usable memory segments
@@ -125,9 +179,13 @@ size_t parse_mmap(void *mb_info, struct mmap_entry *usable_mem, size_t max_entri
   return i;
 }
 
-// only reason we have this is for visualising memory
+
+// visualizes free memory sectors
 void display_mem(void) {
   for (size_t i = 0; i < 32; i++) {
+    if (free_sectors[i].len == 0) {
+      break;
+    }
     prints("Memory number ");
     print_sizet(i);
     prints(": \nAddress: ");
@@ -137,20 +195,4 @@ void display_mem(void) {
     prints("\n\n");
     waitforinput();
   }
-}
-
-void memset(void* ptr, int value, size_t size) {
-  for (size_t i = 0; i < size; i++) {
-    ((char*)ptr)[i] = value;
-  }
-}
-
-void memcpy(const void* src, void* dest, size_t size) {
-  for (size_t i = 0; i < size; i++) {
-    ((char*)dest)[i] = ((char*)src)[i];
-  }
-}
-
-void meminit(void *memory_sector) {
-  memset(memory_sector, 0, 4096);
 }

@@ -28,21 +28,6 @@ void kernel_main(void* mb_info) {
   display_mem(false);
   prints("Welcome to bsOS!\n\n");
 
-  // Trying out lists
-  struct list list1;
-  char message[] = "Hello world\0";
-  char message2[] = "Hello world 2\0";
-  char message3[] = "Hello world 3\0";
-  char message4[] = "Hello world 4\0";
-  list_init(&list1, 3, sizeof(message2));
-  list_push(&list1, message);
-  list_push(&list1, message2);
-  list_push(&list1, message3);
-  list_insert(&list1, 1, message4);
-  prints("\nList index 1: ");
-  prints((char*)list_at(&list1, 1));
-  prints("\n");
-
   prints("\n: ");
 
   char command[32];

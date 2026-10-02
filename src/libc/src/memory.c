@@ -70,6 +70,7 @@ void compress_free_mem(struct free_mem *free_mem, size_t size) {
 // we go through all the memory segments and make an array of some struct free_mem that holds the address and size of that memory segment
 void mem_init(struct mmap_entry mem_sectors[32], size_t mm_count) {
   mem_set(free_sectors, 0, 32*sizeof(struct free_mem));
+  // to change back change size_t i to 0, and mem_sectors free_sectors to i
   for (size_t i = 0; i < mm_count; i++) {
     free_sectors[i].addr = mem_sectors[i].addr;
     free_sectors[i].len = mem_sectors[i].len;
@@ -117,7 +118,6 @@ size_t last_free_mem_segment() {
 // if the pointer > prev.addr+len and pointer+len < current.addr, then the pointer is somewhere between
 // so we copy everything from current.addr on to the right and insert the free memory after prev
 void mem_free(void *ptr, size_t size) {
-  display_mem(true);
   uint64_t addr = (uint64_t)ptr;
   if (addr < free_sectors[0].addr) {
     // if we get here it means the memory is before the first entry
@@ -189,17 +189,17 @@ size_t parse_mmap(void *mb_info, struct mmap_entry *usable_mem, size_t max_entri
 
 // visualizes free memory sectors
 void display_mem(bool wait) {
-  prints("Memory map\n====================================\n");
+  prints("\nMemory map\n====================================");
   for (size_t i = 0; i < 32; i++) {
-    prints("Memory number ");
+    prints("\nMemory number ");
     print_sizet(i);
     prints("\nAddress: ");
     print_uint64(free_sectors[i].addr);
     prints("\nLength: ");
     print_uint64(free_sectors[i].len);
-    prints("\n\n");
 
     if (free_sectors[i+1].len == 0) {
+      prints("\n\n");
       print_sizet(i+1);
       prints(" free sectors found.\n\n");
       break;
@@ -208,9 +208,10 @@ void display_mem(bool wait) {
     if (wait) {
       size_t returnval = waitforinput();
       if (returnval == 1) {
-        return;
+        wait = false;
       }
     }
+    prints("\n");
   }
 }
 
@@ -241,7 +242,7 @@ void list_push(struct list *list, void *entry) {
     mem_move(old_addr, list->addr, list->entry_size * list->item_count);
   }
   // add element
-  mem_copy(entry, list->addr + list->item_count * list->entry_size, list->entry_size);
+  mem_copy(entry, (void *)((uint64_t)(list->addr) + ((uint64_t)(list->item_count) * (uint64_t)(list->entry_size))), list->entry_size);
   list->item_count++;
 }
 
@@ -276,4 +277,28 @@ void list_remove(struct list *list, uint32_t index) {
   move_left(list->addr, list->item_count, index, list->entry_size);
   list_pop(list);
   list->item_count--;
+}
+
+void list_empty(struct list *list) {
+  mem_set(list->addr, 0, list->entry_size * list->size);
+  list->item_count = 0;
+}
+
+void display_list(struct list *list) {
+  prints("List size: ");
+  print_sizet(list->size);
+  prints("\nList entry size: ");
+  print_sizet(list->entry_size);
+  prints("\nList item count: ");
+  print_sizet(list->item_count);
+  prints("\nList address: ");
+  print_uint64((uint64_t)list->addr);
+  prints("\n\n");
+  for (size_t i = 0; i < list->item_count; i++) {
+    prints("Item ");
+    print_sizet(i);
+    prints(": ");
+    prints((char*)list->addr + i * list->entry_size);
+    prints("\n");
+  }
 }

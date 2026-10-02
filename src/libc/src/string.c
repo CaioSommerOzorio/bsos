@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include "string.h"
+#include "memory.h"
 
 size_t strlen(const char* str) {
   size_t len = 0;
@@ -29,7 +30,6 @@ char *inttostring(const char*) {
 }
 
 void string_replace(char* string, char target, char replacement, size_t size) {
-  size_t i = 0;
   for (size_t i = 0; i < size; i++) {
     if (string[i] == target) {
       string[i] = replacement;
@@ -37,25 +37,19 @@ void string_replace(char* string, char target, char replacement, size_t size) {
   }
 }
 
-
-// returns everything before the character
-char *before_character(char *string, char c, size_t size) {
-  static char buff[32];
-  size_t i;
-
-  for (i = 0; i < size && string[i] != c && string[i] != '\0'; i++) {
-    buff[i] = string[i];
+void string_sep(char* string, char target, struct list *list, size_t size, size_t entry_size) {
+  list_init(list, size, entry_size);
+  size_t offset = 0;;
+  char *buff = mem_hold(32);
+  mem_set(buff, 0, 32);
+  for (size_t i = 0; i <= strlen(string); i++) {
+    if (string[i] == target || string[i] == '\0') {
+      list_push(list, buff);
+      mem_set(buff, 0, 32);
+      offset = i+1;
+    }
+    else {
+      buff[i-offset] = string[i];
+    }
   }
-  buff[i] = '\0';
-
-  return buff;
-}
-
-char* after_character(char* string, char c, size_t size) {
-  static char buff[32];
-  size_t i;
-  for (i = 0; i < size && string[i] != c && string[i] != '\0'; i++) {
-    buff[i] = string[i];
-  }
-  buff[i] = '\0';
 }

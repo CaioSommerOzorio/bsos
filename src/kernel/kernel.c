@@ -30,15 +30,17 @@ void kernel_main(void* mb_info) {
 
   prints("\n: ");
 
-  char command[32];
+  char command[128];
   size_t command_len = 0;
   char input;
+
+  mem_set(&command, '\0', 128);
 
   while (1) {
     input = getchar();
     if (input != '\n') {
       // can't be buffer overflow and can't backspace if there is no input yet
-      if (strlen(command) < 32 && !(strlen(command) == 0 && input == '\b')) {
+      if (strlen(command) < 128 && !(strlen(command) == 0 && input == '\b')) {
         if (input != '\b') {
           command[command_len] = input;
           command_len++;
@@ -52,9 +54,8 @@ void kernel_main(void* mb_info) {
     }
     // enter runs command
     else {
-      putchar('\n');
       commandline_execute(command);
-      mem_set(&command, 0, 32);
+      mem_set(&command, '\0', 128);
       command_len = 0;
     }
   }

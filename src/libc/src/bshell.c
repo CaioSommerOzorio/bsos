@@ -15,34 +15,33 @@ void clear(void) {
 void help(void) {
   prints("clear - clears the screen\n");
   prints("memory - shows all available memory\n");
-  prints("help - shows this help message\n");
+  prints("help - shows this help message\n\n");
 }
 
-void commandline_execute(char command[32]) {
+void commandline_execute(char command[128]) {
+  struct list cmd_list;
+  string_sep(command, ' ', &cmd_list, 4, 32);
   if (strlen(command) == 0) {
-    prints("Please enter a command\n\n: ");
+    prints("\nPlease enter a command\n\n");
     return;
   }
-  char *buff = before_character(command, ' ', 32);
-  if (strcmp(buff, "clear")) {
+  else if (strcmp(list_at(&cmd_list, 0), "clear")) {
     clear();
   }
-  else if (strcmp(buff, "memory")) {
+  else if (strcmp(list_at(&cmd_list, 0), "memory")) {
     note("Press enter to read next memory segment, q to exit");
     display_mem(true);
     note("You are using bsOS");
   }
-  else if (strcmp(buff, "help")) {
+  else if (strcmp(list_at(&cmd_list, 0), "help")) {
     help();
-    buff = after_character(command, ' ', 32);
-    prints(buff);
   }
   else {
-    prints("Unknown command: ");
+    prints("\nUnknown command: ");
     prints(command);
-    prints("\n");
+    prints("\n\n");
   }
-  prints("\n: ");
+  prints(": ");
 }
 
 // Enter returns 0

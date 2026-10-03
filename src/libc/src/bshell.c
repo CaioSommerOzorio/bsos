@@ -31,14 +31,15 @@ void make_file(char* name) {
   mem_copy(name, newfile.name, 32);
   newfile.addr = file_addr;
   list_push(fs.files, &newfile);
-  prints("\nFile created\n\n");
+  prints("\nFile ");
+  prints(name);
+  prints(" created\n\n");
 }
 
 // genuinely have no idea why i have to do this lol but whatever works
 void display_files(struct list *list) {
   prints("\nNumber of files: ");
   print_sizet(list->item_count);
-  prints("\n");
   for (size_t i = 0; i < list->item_count; i++) {
     prints("\n");
     prints((char*)list->addr + i * list->entry_size);

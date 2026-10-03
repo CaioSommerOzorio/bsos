@@ -226,11 +226,11 @@ void list_push(struct list *list, void *entry) {
   if (list->item_count == list->size) {
     // need to allocate bigger memory
     // for now double the size
-    mem_free(list->addr, list->entry_size * list->size);
+    mem_free(list->addr, (uint64_t)list->entry_size * (uint64_t)list->size);
     list->size *= 2;
     void* old_addr = list->addr;
     list->addr = mem_hold(list->entry_size * list->size);
-    if (list->addr = NULL) {
+    if (list->addr == NULL) {
       // not enough memory to double size, we just increase by one
       list->size = (list->size / 2) + 1;
       list->addr = mem_hold(list->entry_size * list->size);

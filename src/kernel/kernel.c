@@ -26,6 +26,8 @@ void kernel_main(void* mb_info) {
 
   note("You are using bsOS");
   display_mem(false);
+  prints("Creating filesystem...\n");
+  init_filesystem(&fs);
   prints("Welcome to bsOS!\n\n");
 
   prints("\n: ");

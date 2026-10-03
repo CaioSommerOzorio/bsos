@@ -302,3 +302,13 @@ void display_list(struct list *list) {
     prints("\n");
   }
 }
+
+// file_system holds the address of a list of addresses of files, and the address of a list of addresses of workspaces
+void init_filesystem(struct file_system *fs) {
+  void *files = mem_hold(sizeof(struct list));
+  void *workspaces = mem_hold(sizeof(struct list));
+  list_init(files, 1, sizeof(struct file));
+  list_init(workspaces, 1, sizeof(struct workspace));
+  fs->files = files;
+  fs->workspaces = workspaces;
+}

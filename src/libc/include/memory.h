@@ -29,8 +29,25 @@ struct list {
   uint32_t size;
   uint32_t entry_size;
   uint32_t item_count;
-  uint64_t *addr;
+  void *addr;
 };
+
+struct file_system {
+  void *files;
+  void *workspaces;
+};
+
+struct file {
+  char name[32];
+  void *addr;
+};
+
+struct workspace {
+  char name[32];
+  void *addr;
+};
+
+static struct file_system fs;
 
 size_t parse_mmap(void *mb_info, struct mmap_entry *usable_mem, size_t max_entries);
 void move_right(void *array, size_t size, size_t index, size_t element_size);
@@ -49,5 +66,6 @@ void list_pop(struct list *list);
 void *list_at(struct list *list, uint32_t index);
 void list_insert(struct list *list, uint32_t index, void *entry);
 void display_list(struct list *list);
+void init_filesystem(struct file_system *fs);
 
 #endif
